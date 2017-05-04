@@ -432,7 +432,8 @@
 			linux,default-trigger = "vibrator";
 			pwm-config = <0>;
 			lpg-select = <8>;
-			qcom,qpnp-vib-timeout-ms = <15000>;
+			qcom,vib-timeout-ms = <15000>;
+			qcom,vib-vtg-level-mV = <3100>;
 		};
 
 		qcom,leds@d800 {

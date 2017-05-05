@@ -2325,8 +2325,8 @@ CONFIG_MSM_ISPIF=y
 # CONFIG_HI256 is not set
 # CONFIG_OV5648 is not set
 # CONFIG_MT9M114 is not set
-CONFIG_VD6869=y
-CONFIG_OV4688=y
+# CONFIG_VD6869 is not set
+# CONFIG_OV4688 is not set
 # CONFIG_SP1628 is not set
 # CONFIG_GC0339 is not set
 # CONFIG_OV8825 is not set
@@ -2337,7 +2337,7 @@ CONFIG_OV4688=y
 # CONFIG_OV13850 is not set
 CONFIG_OV13850_800M=y
 # CONFIG_OV13850_1140M is not set
-CONFIG_OV2722=y
+# CONFIG_OV2722 is not set
 # CONFIG_S5K5E_ONELANE is not set
 # CONFIG_S5K5E_TWOLANE is not set
 # CONFIG_s5k5e is not set

@@ -24,8 +24,6 @@
 #include <linux/wakelock.h>
 #include <linux/workqueue.h>
 #include <linux/htc_flashlight.h>
-#include <linux/earlysuspend.h>
-#include <linux/android_alarm.h>
 #include <linux/delay.h>
 #include <linux/regulator/consumer.h>
 #include <linux/delay.h>
@@ -468,9 +466,7 @@ struct qpnp_led_data {
 	struct work_struct	work;
 	int			turn_off_delay_ms;
 	struct delayed_work reflesh_timer;
-	struct early_suspend    flt_early_suspend;
 	int                     torch_mode;
-	struct alarm            led_alarm;
 	struct work_struct 		led_off_work;
 	int status;
 	int mode;
@@ -3640,14 +3636,6 @@ static void led_off_work_func(struct work_struct *work)
 	qpnp_led_turn_off(ldata);
 }
 
-static void led_alarm_handler(struct alarm *alarm)
-{
-	struct qpnp_led_data *ldata;
-
-	ldata = container_of(alarm, struct qpnp_led_data, led_alarm);
-	queue_work(g_led_work_queue, &ldata->led_off_work);
-}
-
 static ssize_t led_off_timer_store(struct device *dev,
 				   struct device_attribute *attr,
 				   const char *buf, size_t count)
@@ -3656,8 +3644,6 @@ static ssize_t led_off_timer_store(struct device *dev,
 	struct led_classdev *led_cdev;
 	int min, sec;
 	uint16_t off_timer;
-	ktime_t interval;
-	ktime_t next_alarm;
 
 	min = -1;
 	sec = -1;
@@ -3674,13 +3660,6 @@ static ssize_t led_off_timer_store(struct device *dev,
 	LED_INFO("Setting %s off_timer to %d min %d sec \n", led_cdev->name, min, sec);
 	off_timer = min * 60 + sec;
 
-	alarm_cancel(&led->led_alarm);
-	cancel_work_sync(&led->led_off_work);
-	if (off_timer) {
-		interval = ktime_set(off_timer, 0);
-		next_alarm = ktime_add(alarm_get_elapsed_realtime(), interval);
-		alarm_start_range(&led->led_alarm, next_alarm, next_alarm);
-	}
 	return count;
 }
 static DEVICE_ATTR(off_timer, 0644, NULL, led_off_timer_store);
@@ -4073,7 +4052,6 @@ static int __devinit qpnp_leds_probe(struct spmi_device *spmi)
 				if (rc < 0) {
 					LED_ERR("%s: Failed to create %s attr off_timer\n", __func__,  led->cdev.name);
 				}
-				alarm_init(&led->led_alarm, ANDROID_ALARM_ELAPSED_REALTIME_WAKEUP, led_alarm_handler);
 				INIT_WORK(&led->led_off_work, led_off_work_func); 
 			}
 			INIT_DELAYED_WORK(&led->blink_delayed_work, led_blink_do_work);
@@ -4089,7 +4067,6 @@ static int __devinit qpnp_leds_probe(struct spmi_device *spmi)
 				if (rc < 0) {
 					LED_ERR("%s: Failed to create %s attr off_timer\n", __func__,  led->cdev.name);
 				}
-				alarm_init(&led->led_alarm, ANDROID_ALARM_ELAPSED_REALTIME_WAKEUP, led_alarm_handler);
 				INIT_WORK(&led->led_off_work, led_off_work_func); 
 			}
 			INIT_DELAYED_WORK(&led->blink_delayed_work, led_blink_do_work);

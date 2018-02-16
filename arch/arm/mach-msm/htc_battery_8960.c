@@ -1541,7 +1541,7 @@ static void batt_regular_timer_handler(unsigned long data)
 static enum alarmtimer_restart batt_check_alarm_handler(struct alarm *alarm, ktime_t now)
 {
 	BATT_LOG("alarm handler, but do nothing.");
-	return;
+	return ALARMTIMER_NORESTART;
 }
 
 static int bounding_fullly_charged_level(int upperbd, int current_level)
